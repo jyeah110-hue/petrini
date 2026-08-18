@@ -95,3 +95,58 @@ XSS·CSRF의 동작 원리를 하나씩 파악해가는 과정이 흥미로웠�
 앞으로 보안의 특성을 차근차근 익히고 더 많은 코드를 보며, 
 실무에서는 이런 기능들을 어떻게 구현하는지 깊이 알아가고 싶습니다. 
 또한 오류를 잘 기록해두어 동일한 문제 발생 시 빠르게 대응할 수 있도록 하는 습관의 중요성도 느꼈습니다.
+
+## 화면 미리보기
+
+### 메인 페이지
+![메인](images/main.JPG)
+
+### 숙소 예약 (전담 도메인)
+![숙소예약](images/stay.JPG)
+
+### 병원 (카카오맵 연동)
+![병원](images/hospital.JPG)
+
+### 유기동물 조회
+![유기동물](images/adoption.JPG)
+
+### 펫맵
+![펫맵](images/petmap.JPG)
+
+### 로그인 / 회원가입
+![로그인](images/login.JPG)
+
+### 결제 (Toss 연동)
+![결제](images/payment.JPG)
+
+<details>
+<summary> 더 많은 화면 보기 (클릭하여 펼치기)</summary>
+
+### 사업자
+![사업자](images/biz.JPG)
+
+### 관리자
+![관리자](images/admin.JPG)
+
+### 쇼핑
+![쇼핑](images/store.JPG)
+
+### 병원 상세
+![병원상세](images/hospital_detail.JPG)
+
+### 병원 예약
+![병원예약](images/hospital_reserve.JPG)
+
+### 숙소 상세
+![숙소상세](images/stay_detail.JPG)
+
+### 유기동물 상세
+![유기동물 상세](images/abandon_detail.JPG)
+
+### 커뮤니티
+![커뮤니티](images/community.JPG)
+
+### 마이페이지
+![마이페이지](images/mypage.JPG)
+
+</details>
