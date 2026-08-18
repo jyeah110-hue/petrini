@@ -108,7 +108,7 @@ XSS·CSRF의 동작 원리를 하나씩 파악해가는 과정이 흥미로웠�
 ![병원](images/hospital.JPG)
 
 ### 유기동물 조회
-![유기동물](images/adoption.JPG)
+![유기동물](images/abandon.JPG)
 
 ### 펫맵
 ![펫맵](images/petmap.JPG)
