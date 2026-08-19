@@ -39,8 +39,11 @@
 ## 기술 스택
 
 **Backend**: Java, Spring Boot, MyBatis, Oracle
+
 **Frontend**: JSP, JavaScript
+
 **외부 연동**: Kakao Map API, Toss Payments, 공공 데이터 API(유기동물)
+
 **인프라**: GCP, Git
 
 ---
