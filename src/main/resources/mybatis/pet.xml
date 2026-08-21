@@ -1,0 +1,40 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.petcare.petcare.pet.mapper.PetMapper">
+    <select id="selectPetListByMemberId" parameterType="string" resultType="com.petcare.petcare.pet.vo.PetVO">
+        SELECT  ID          AS PET_ID,
+                MEMBER_ID   AS MEMBER_ID,
+                NAME        AS PET_NAME,
+                TYPE        AS PET_TYPE,
+                SPECIES,
+                GENDER,
+                AGE,
+                WEIGHT
+          FROM  PET
+         WHERE  MEMBER_ID = #{memberId}
+         ORDER BY ID ASC
+    </select>
+
+    <insert id="insertPet" parameterType="com.petcare.petcare.pet.vo.PetVO">
+        INSERT INTO PET (
+            MEMBER_ID,
+            NAME,
+            TYPE,
+            SPECIES,
+            GENDER,
+            AGE,
+            WEIGHT,
+            CREATED
+        ) VALUES (
+            #{memberId},
+            #{petName},
+            #{petType},
+            #{petSpecies, jdbcType=VARCHAR},
+            #{petGender, jdbcType=VARCHAR},
+            #{petAge, jdbcType=NUMERIC},
+            #{petWeight, jdbcType=NUMERIC},
+            SYSDATE
+        )
+    </insert>
+</mapper>

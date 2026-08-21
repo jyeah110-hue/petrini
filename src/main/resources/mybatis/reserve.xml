@@ -1,0 +1,114 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+
+<mapper namespace="com.petcare.petcare.reserve.mapper.ReserveMapper">
+
+    <select id="selectReserveByReserveId" parameterType="string" resultType="com.petcare.petcare.reserve.vo.ReserveVO">
+        SELECT  ID              AS RESV_ID, 
+                TYPE,
+                BIZ_ID, 
+                MEMBER_ID, 
+                PET_ID, 
+                ROOM_ID,
+                MEMO,
+                TOTAL_AMOUNT    AS totalAmount,
+                STATUS, 
+                CREATED
+        FROM    RESERVE R
+        WHERE   ID = #{resvId}
+    </select>
+
+    <update id="updateReserveStatus">
+        UPDATE RESERVE
+           SET STATUS = #{status}
+         WHERE ID   = #{resvId}
+    </update>
+
+    <select id="selectStayReserveByReserveId" parameterType="string" resultType="com.petcare.petcare.reserve.vo.ReserveVO">
+        SELECT  R.ID, 
+                R.RESV_NO, 
+                R.RESV_TYPE,
+                R.MEMBER_NO, 
+                R.PET_ID, 
+                R.TARGET_ID, 
+                R.ROOM_ID,
+                R.CHECKIN_DATE  AS checkinDate,
+                R.CHECKOUT_DATE AS checkoutDate,
+                R.REQUEST_MEMO  AS requestMemo,
+                R.TOTAL_AMOUNT  AS totalAmount,
+                R.STATUS_CD, 
+                R.REG_DATE,
+                M.MEMBER_NAME   AS memberName,
+                P.PET_NAME      AS petName,
+                P.SPECIES       AS petSpecies,
+                P.BREED         AS petBreed,
+                S.NAME          AS stayName,
+                SR.NAME         AS serviceName
+        FROM    TB_RESERVATION R
+        JOIN    TB_MEMBER M    ON M.MEMBER_NO  = R.MEMBER_NO
+        JOIN    TB_PET P       ON P.PET_ID     = R.PET_ID
+        LEFT    JOIN STAY S  ON S.STAY_ID    = TO_NUMBER(R.TARGET_ID)
+        LEFT    JOIN ROOM SR ON SR.ROOM_ID = R.ROOM_ID
+        WHERE   R.RESV_ID = #{resvId}
+    </select>
+
+    <insert id="insertStayReserve" parameterType="com.petcare.petcare.reserve.vo.ReserveVO" useGeneratedKeys="true" keyProperty="resvId" keyColumn="ID">
+        INSERT INTO RESERVE (
+            ID,
+            BIZ_ID,
+            BIZ_TYPE,
+            MEMBER_ID,
+            PET_ID,
+            MEMO,
+            STATUS,
+            RESJECT,
+            CREATED,
+            RESV_DATE,
+            RESV_TIME,
+            CHECKIN_DATE,
+            CHECKOUT_DATE,
+            SYMPTOMS,
+            TOTAL_AMOUNT
+        ) VALUES (
+            #{resvId}, 
+            #{bizId}, 
+            #{bizType}, 
+            #{memberId}, 
+            #{petId, jdbcType=NUMERIC},
+            #{memo, jdbcType=VARCHAR}, 
+            #{status}, 
+            #{reject}, 
+            SYSDATE,
+            #{resvDate, jdbcType=DATE},
+            #{resvTime, jdbcType=DATE},
+            #{checkinDate}, 
+            #{checkoutDate}, 
+            #{symptoms},
+            #{totalAmount}
+        )
+    </insert>
+
+    <!--예약
+    날짜겹침 판단 : 새 예약의 체크인 < 기존 예약읜 체크아웃 
+                    AND
+                   새 예약의 체크아웃 > 기존 예약의 체크인
+                   
+    날짜 겹침을 뒤집으면 안겹치는 조건이 되는데, 
+    쿼리에서는 겹치는게 있으면 예약 불가로 판단하는 것이 더 직관적
+
+    카운트 0 : 예약가능
+    카운트 1 : 예약 불가능
+    -->
+    <select id="countStayReserve" parameterType="map" resultType="int">
+        <![CDATA[
+            SELECT COUNT(*)
+              FROM RESERVE
+             WHERE ROOM_ID = #{roomId}
+               AND RESV_TYPE = 'STAY'
+               AND STATUS_CD IN ('PENDING', 'CONFIRMED')
+               AND CHECKIN_DATE < #{checkoutDate}
+               AND CHECKOUT_DATE > #{checkinDate}        
+        ]]>
+    </select>  
+</mapper>

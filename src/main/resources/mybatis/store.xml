@@ -1,0 +1,39 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.petcare.petcare.store.mapper.StoreMapper">
+<!--  
+    
+-->
+    <select id="selectProductList" parameterType="com.petcare.petcare.store.vo.SearchVO" resultType="com.petcare.petcare.store.vo.ProductVO">
+        SELECT
+            ID  AS PRODUCT_ID,
+            CODE,
+            NAME,
+            BRAND,
+            CATEGORY_ID,
+            PRICE,
+            SALE
+        FROM PRODUCT
+    </select>
+
+    <select id="selectCategoryList" resultType="com.petcare.petcare.store.vo.CategoryVO">
+        SELECT 
+            ID  AS CATEGORY_ID, 
+            PARENT_ID, 
+            NAME, 
+            DEPTH
+        FROM PRODUCT_CATEGORY
+        WHERE STATUS = 1
+        ORDER BY CATEGORY_ID
+    </select>
+
+    <select id="selectBrandList" resultType="com.petcare.petcare.store.vo.BrandVO">
+        SELECT 
+            BRAND, 
+            COUNT(*) AS PRODUCT_COUNT
+        FROM PRODUCT
+        WHERE BRAND IS NOT NULL
+        GROUP BY BRAND
+        ORDER BY PRODUCT_COUNT DESC
+    </select>
+</mapper>

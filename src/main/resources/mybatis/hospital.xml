@@ -1,0 +1,154 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.petcare.petcare.hospital.mapper.HospitalMapper">
+    <select id="selectHospitalListBySearch" parameterType="com.petcare.petcare.hospital.vo.HospitalVO" resultType="com.petcare.petcare.hospital.vo.HospitalVO">
+        SELECT      H.ID    AS HOSPITAL_ID,
+                    H.BIZ_ID,
+                    H.NAME,
+                    H.PHONE,
+                    H.ZIPCODE,
+                    H.ADDR1,
+                    H.ADDR2,
+                    H.LAT,
+                    H.LNG,
+                    H.DESCRIPTION,
+                    H.TAGS,
+                    H.TIMETABLE,
+                    (SELECT F.URL
+                       FROM FILES F
+                      WHERE F.REF_TYPE = 'HOSPITAL'
+                        AND F.REF_ID = H.ID
+                        AND ROWNUM = 1
+                    ) AS THUMB
+        FROM        HOSPITAL H
+        WHERE 1=1
+        <!-- 키워드 검색 (병원명 또는 주소) -->
+        <if test="keyword != null and keyword != ''">
+           AND (H.NAME LIKE '%' || #{keyword} || '%'
+                OR H.ADDR1 LIKE '%' || #{keyword} || '%'
+                OR H.ADDR2 LIKE '%' || #{keyword} || '%')
+        </if>
+        <!-- 진료과목 필터 -->
+        <if test="tagFilter != null and tagFilter != '' and tagFilter != 'ALL'">
+           AND H.TAGS LIKE '%' || #{tagFilter} || '%'
+        </if>
+        <!-- 진료 대상 필터 -->
+        <if test="target != null and target != '' and target != 'ALL'">
+           AND H.TAGS LIKE '%' || #{target} || '%'
+        </if>
+        ORDER BY H.ID DESC
+    </select>
+
+    <select id="selectHospital" parameterType="long" resultType="com.petcare.petcare.hospital.vo.HospitalVO">
+        SELECT  H.ID  AS HOSPITAL_ID, 
+                H.BIZ_ID,
+                H.NAME, 
+                H.PHONE,
+                H.ZIPCODE, 
+                H.ADDR1, 
+                H.ADDR2,
+                H.LAT, 
+                H.LNG,
+                H.DESCRIPTION, 
+                H.TAGS,
+                H.TIMETABLE, 
+                (SELECT F.URL
+                    FROM FILES F
+                    WHERE F.REF_TYPE = 'HOSPITAL'
+                    AND F.REF_ID = H.ID
+                    AND ROWNUM = 1
+                ) AS THUMB
+        FROM    HOSPITAL H
+        WHERE   ID = #{hospitalId}
+    </select> 
+
+    <select id="selectHospitalByMemberId" parameterType="string" resultType="com.petcare.petcare.hospital.vo.HospitalVO">
+        SELECT      H.ID  AS HOSPITAL_ID, 
+                    H.BIZ_ID,
+                    H.NAME, 
+                    H.PHONE,
+                    H.ZIPCODE, 
+                    H.ADDR1, 
+                    H.ADDR2,
+                    H.LAT, 
+                    H.LNG,
+                    H.DESCRIPTION, 
+                    H.TAGS,
+                    H.TIMETABLE, 
+                    (SELECT F.URL
+                       FROM FILES F
+                      WHERE F.REF_TYPE = 'HOSPITAL'
+                        AND F.REF_ID = H.ID
+                        AND ROWNUM = 1
+                    ) AS THUMB
+        FROM        HOSPITAL H
+        JOIN        BUSINESS B ON H.BIZ_ID = B.ID
+        WHERE       B.MEMBER_ID = #{memberId}
+    </select> 
+
+    <select id="selectHospitalByBizId" parameterType="long" resultType="com.petcare.petcare.hospital.vo.HospitalVO">
+        SELECT  H.ID  AS HOSPITAL_ID, 
+                H.BIZ_ID,
+                H.NAME, 
+                H.PHONE,
+                H.ZIPCODE, 
+                H.ADDR1, 
+                H.ADDR2,
+                H.LAT, 
+                H.LNG,
+                H.DESCRIPTION, 
+                H.TAGS,
+                H.TIMETABLE, 
+                (SELECT F.URL
+                    FROM FILES F
+                    WHERE F.REF_TYPE = 'HOSPITAL'
+                    AND F.REF_ID = H.ID
+                    AND ROWNUM = 1
+                ) AS THUMB
+        FROM    HOSPITAL H
+        WHERE   BIZ_ID = #{bizId}
+    </select> 
+
+    <insert id="insertHospital" parameterType="long">
+        INSERT INTO HOSPITAL (
+                                    BIZ_ID,
+                                    NAME,
+                                    PHONE,
+                                    ZIPCODE,
+                                    ADDR1,
+                                    ADDR2,
+                                    CREATED
+                                )
+        SELECT  B.ID,
+                B.NAME,
+                B.PHONE,
+                B.ZIPCODE,
+                B.ADDR1,
+                B.ADDR2,
+                SYSDATE
+        FROM    BUSINESS B
+        WHERE   B.ID = #{bizId}
+        AND     NOT EXISTS (    SELECT  1
+                                FROM    HOSPITAL H
+                                WHERE   H.BIZ_ID = B.ID
+                            )
+    </insert>
+
+    <update id="updateHospital" parameterType="com.petcare.petcare.hospital.vo.HospitalVO">
+        UPDATE HOSPITAL
+            <set>
+               <if test="name != null"> NAME = #{name}, </if>
+               <if test="phone != null"> PHONE = #{phone, jdbcType=VARCHAR}, </if>
+               <if test="zipcode != null"> ZIPCODE = #{zipcode, jdbcType=VARCHAR}, </if>
+               <if test="addr1 != null"> ADDR1 = #{addr1, jdbcType=VARCHAR}, </if>
+               <if test="addr2 != null"> ADDR2 = #{addr2, jdbcType=VARCHAR}, </if>
+               <if test="lat != null"> LAT = #{lat, jdbcType=DOUBLE}, </if>
+               <if test="lng != null"> LNG = #{lng, jdbcType=DOUBLE}, </if>
+               <if test="description != null"> DESCRIPTION = #{description, jdbcType=VARCHAR}, </if>
+               <if test="tags != null"> TAGS = #{tags, jdbcType=VARCHAR}, </if>
+               <if test="timetable != null"> TIMETABLE = #{timetable, jdbcType=CLOB} </if>
+            </set>
+        WHERE  ID = #{hospitalId}
+    </update>
+</mapper>

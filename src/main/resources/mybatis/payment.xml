@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.petcare.petcare.payment.PaymentMapper">
+
+    <insert id="insertPayment" parameterType="com.petcare.petcare.payment.PaymentVO" useGeneratedKeys="true" keyProperty="paymentId" keyColumn="ID">
+        INSERT INTO PAYMENT (
+            RESV_ID, PAY_TYPE, PAY_METHOD,
+            PAY_AMOUNT, TOSS_PAYMENT_KEY, TOSS_ORDER_ID,
+            PAY_STATUS, PAY_DATE
+        ) VALUES (
+            #{paymentId}, #{resvId}, 'RESERVATION', #{payMethod, jdbcType=VARCHAR},
+            #{payAmount}, #{tossPaymentKey}, #{tossOrderId},
+            #{payStatus}, SYSDATE
+        )
+    </insert>
+
+</mapper>

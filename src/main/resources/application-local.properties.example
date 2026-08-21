@@ -1,0 +1,11 @@
+# DB 설정
+spring.datasource.driver-class-name=oracle.jdbc.OracleDriver
+spring.datasource.url=jdbc:oracle:thin:@localhost:1521:xe
+spring.datasource.username=C##PETCARE
+spring.datasource.password=1234
+
+# API 키
+KAKAO_REST_API_KEY=17a2a2e64e3ea96800eea45eb33cc90a
+KAKAO_JS_API_KEY=9dd4881b6589cf4c0fa61514aff5ff80
+PUBLIC_SERVICE_API_KEY=2b51e632efe531f6be118d63888e287e0588445a805a7b48fba2d090c9e3c526
+TOSS_CLIENT_KEY=test_gck_docs_Ovk5rk1EwkEbP0W43n07xlzm

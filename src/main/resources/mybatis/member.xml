@@ -1,0 +1,80 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.petcare.petcare.member.mapper.MemberMapper">
+    <select id="selectMemberById"
+            resultType="com.petcare.petcare.member.vo.MemberVO">
+        SELECT  ID,      
+                PASSWORD,     
+                NAME,
+                EMAIL,          
+                PHONE,          
+                ZIPCODE,       
+                ADDR1,          
+                ADDR2,                    
+                POINT,
+                ROLE  
+        FROM    MEMBER
+        WHERE   ID = #{id}
+    </select>
+
+    <select id="countMemberByEmail" resultType="int">
+        SELECT COUNT(*) FROM MEMBER WHERE EMAIL = #{email}
+    </select>
+
+    <select id="countMemberById" resultType="int">
+        SELECT COUNT(*) FROM MEMBER WHERE ID = #{id}
+    </select>
+
+    <insert id="insertMember" parameterType="com.petcare.petcare.member.vo.MemberVO">
+        INSERT INTO MEMBER (
+            ID,
+            PASSWORD,
+            NAME,
+            EMAIL,
+            PHONE,
+            ZIPCODE,
+            ADDR1,
+            ADDR2,
+            POINT,
+            ROLE,
+            AGREESERVICE,
+            AGREEPRIVACY,
+            AGREELOCATION,
+            AGREEMARKETING,
+            CREATED
+        ) VALUES (
+            #{id},
+            #{password},
+            #{name},
+            #{email},
+            #{phone},
+            #{zipcode, jdbcType=VARCHAR},
+            #{addr1, jdbcType=VARCHAR},
+            #{addr2, jdbcType=VARCHAR},
+            0,
+            #{role},
+            #{agreeService},
+            #{agreePrivacy},
+            #{agreeLocation},
+            #{agreeMarketing},
+            SYSDATE
+        )
+    </insert>
+
+    <insert id="insertMemberSocial" parameterType="com.petcare.petcare.member.vo.MemberSocialVO" useGeneratedKeys="true" keyProperty="id" keyColumn="ID">
+        INSERT INTO MEMBER_SOCIAL (
+            PROVIDER_UID,
+            PROVIDER,
+            CREATED
+        ) VALUES (
+            #{providerUid},
+            #{provider},
+            SYSDATE
+        )
+    </insert>
+
+  <update id="updateMemberRole">
+    UPDATE MEMBER SET ROLE = #{role} WHERE ID = #{id}
+  </update>
+</mapper>

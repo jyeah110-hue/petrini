@@ -1,0 +1,56 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.petcare.petcare.file.mapper.FileMapper">
+    <insert id="insertFile" parameterType="com.petcare.petcare.file.vo.FileVO">
+        INSERT INTO FILES (
+                                REF_ID, 
+                                REF_TYPE, 
+                                URL, 
+                                FILENAME,
+                                CREATED
+                            )
+        VALUES              (
+                                #{refId}, 
+                                #{refType}, 
+                                #{url}, 
+                                #{filename},
+                                SYSDATE
+                            )
+    </insert>
+
+    <select id="selectFileList" parameterType="com.petcare.petcare.file.vo.FileVO" resultType="com.petcare.petcare.file.vo.FileVO">
+        SELECT      ID AS FILE_ID, 
+                    REF_ID, 
+                    REF_TYPE, 
+                    URL,
+                    FILENAME, 
+                    CREATED
+        FROM        FILES
+        WHERE       REF_TYPE = #{refType}
+        AND         REF_ID = #{refId}
+        ORDER BY    FILENAME ASC
+    </select>
+
+    <!-- 파일 1건 조회 (삭제 전 경로 확인용) -->
+    <select id="selectFile" parameterType="long" resultType="com.petcare.petcare.file.vo.FileVO">
+        SELECT      ID  AS FILE_ID,
+                    REF_ID,
+                    REF_TYPE,
+                    URL,
+                    FILENAME,
+                    CREATED
+        FROM        FILES
+        WHERE       ID = #{fileId}
+    </select>
+
+    <!-- 파일 1건 삭제 -->
+    <delete id="deleteFile" parameterType="long">
+        DELETE FROM FILES WHERE ID = #{fileId}
+    </delete>
+
+    <!-- 전체 삭제 (refType + refId) — 도메인 자체 삭제 시 사용 -->
+    <delete id="deleteFilesByRefId" parameterType="com.petcare.petcare.file.vo.FileVO">
+        DELETE FROM FILES WHERE REF_TYPE = #{refType} AND REF_ID = #{refId}
+    </delete>
+</mapper>

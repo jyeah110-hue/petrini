@@ -1,0 +1,295 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.petcare.petcare.stay.mapper.StayMapper">
+    <!--room-->
+    <sql id="roomAggJoin">
+        LEFT JOIN   (   
+            SELECT      STAY_ID,
+                        MIN(PRICE) AS MIN_PRICE,
+                        COUNT(*) AS ROOM_CNT
+            FROM        ROOM
+            GROUP BY    STAY_ID
+        ) R ON S.ID = R.STAY_ID
+    </sql>
+
+    <!--thumb-->
+    <sql id="thumbSubquery">
+        (   SELECT   F.URL
+            FROM     FILES F
+            WHERE    F.REF_TYPE = 'STAY'
+            AND      F.REF_ID = S.ID
+            AND      ROWNUM     = 1
+        ) AS THUMB
+    </sql>
+
+    <select id="selectStayListBySearch" parameterType="com.petcare.petcare.stay.vo.StayVO" resultType="com.petcare.petcare.stay.vo.StayVO">
+        SELECT      S.ID     AS STAY_ID,
+                    S.NAME,
+                    S.ADDR1,
+                    S.ADDR2,
+                    S.LAT,
+                    S.LNG,
+                    S.TAGS,
+                    NVL(R.MIN_PRICE, 0) AS minPrice,
+                    NVL(R.ROOM_CNT,  0) AS roomCount,
+                    <include refid="thumbSubquery"/>
+        FROM        STAY S
+        <include refid="roomAggJoin"/>
+        <!-- 지역 필터 -->
+        <if test="region != null and region != '' and region != '전체'">
+           AND S.REGION = #{region}
+        </if>
+        <!-- 특화 조건 필터 (선택된 시설 코드 모두 포함) -->
+        <if test="tagFilter != null and tagFilter.length > 0">
+            <foreach collection="tagFilter" item="tag">
+               AND S.TAGS LIKE '%' || #{tag} || '%'
+            </foreach>
+        </if>
+        <!-- 1박 최대 요금 필터 -->
+        <if test="maxPrice > 0 and maxPrice &lt; 300000">
+           AND NVL(R.MIN_PRICE, 0) &lt;= #{maxPrice}
+        </if>
+        <!-- 정렬 -->
+        <choose>
+            <when test="sort != null and sort == 'priceLow'">
+                ORDER BY NVL(R.MIN_PRICE, 999999999) ASC
+            </when>
+            <otherwise>
+                ORDER BY S.ID
+            </otherwise>
+        </choose>
+    </select>
+
+    <select id="selectStay" parameterType="long" resultType="com.petcare.petcare.stay.vo.StayVO">
+        SELECT      S.ID  AS STAY_ID, 
+                    S.BIZ_ID,
+                    S.NAME, 
+                    S.PHONE,
+                    S.ZIPCODE, 
+                    S.ADDR1, 
+                    S.ADDR2,
+                    S.LAT, 
+                    S.LNG,
+                    S.DESCRIPTION, 
+                    S.TAGS,
+                    S.CHECKIN, 
+                    S.CHECKOUT, 
+                    S.PET_FEE, 
+                    S.PET_POLICY, 
+                    S.REFUND_POLICY, 
+                    S.REGION, 
+                    NVL(R.MIN_PRICE, 0) AS minPrice,
+                    NVL(R.ROOM_CNT,  0) AS roomCount,
+                    <include refid="thumbSubquery"/>
+        FROM        STAY S
+        <include refid="roomAggJoin"/>
+        WHERE       S.ID = #{stayId}
+    </select> 
+
+    <select id="selectStayByMemberId" parameterType="string" resultType="com.petcare.petcare.stay.vo.StayVO">
+        SELECT      S.ID  AS STAY_ID, 
+                    S.BIZ_ID,
+                    S.NAME, 
+                    S.PHONE,
+                    S.ZIPCODE, 
+                    S.ADDR1, 
+                    S.ADDR2,
+                    S.LAT, 
+                    S.LNG,
+                    S.DESCRIPTION, 
+                    S.TAGS,
+                    S.CHECKIN, 
+                    S.CHECKOUT, 
+                    S.PET_FEE, 
+                    S.PET_POLICY, 
+                    S.REFUND_POLICY, 
+                    S.REGION, 
+                    NVL(R.MIN_PRICE, 0) AS minPrice,
+                    NVL(R.ROOM_CNT,  0) AS roomCount,
+                    <include refid="thumbSubquery"/>
+        FROM        STAY S
+        JOIN        BUSINESS B 
+        ON          S.BIZ_ID = B.ID
+        <include refid="roomAggJoin"/>
+        WHERE       B.MEMBER_ID = #{memberId}
+    </select> 
+
+    <select id="selectStayByBizId" parameterType="long" resultType="com.petcare.petcare.stay.vo.StayVO">
+        SELECT      S.ID  AS STAY_ID, 
+                    S.BIZ_ID,
+                    S.NAME, 
+                    S.PHONE,
+                    S.ZIPCODE, 
+                    S.ADDR1, 
+                    S.ADDR2,
+                    S.LAT, 
+                    S.LNG,
+                    S.DESCRIPTION, 
+                    S.TAGS,
+                    S.CHECKIN, 
+                    S.CHECKOUT, 
+                    S.PET_FEE, 
+                    S.PET_POLICY, 
+                    S.REFUND_POLICY, 
+                    S.REGION, 
+                    NVL(R.MIN_PRICE, 0) AS minPrice,
+                    NVL(R.ROOM_CNT,  0) AS roomCount,
+                    <include refid="thumbSubquery"/>
+        FROM        STAY S
+        <include refid="roomAggJoin"/>
+        WHERE       S.BIZ_ID = #{bizId}
+    </select> 
+
+    <select id="selectRoomsByStayId" parameterType="long" resultType="com.petcare.petcare.stay.vo.RoomVO">
+        SELECT      ID,
+                    STAY_ID,
+                    NAME,
+                    PRICE,
+                    MAXPEOPLE,
+                    MAXPET,
+        FROM        ROOM
+        WHERE       STAY_ID = #{stayId}
+        ORDER BY    PRICE
+    </select>
+
+    <insert id="insertStay" parameterType="long">
+        INSERT INTO STAY (
+                                    BIZ_ID,
+                                    NAME,
+                                    PHONE,
+                                    ZIPCODE,
+                                    ADDR1,
+                                    ADDR2,
+                                    REGION,
+                                    CREATED
+                        )
+        SELECT  B.ID,
+                B.NAME,
+                B.PHONE,
+                B.ZIPCODE,
+                B.ADDR1,
+                B.ADDR2,
+                CASE
+                    WHEN B.ADDR1 LIKE '%서울%' THEN '서울'
+                    WHEN B.ADDR1 LIKE '%경기%' THEN '경기'
+                    WHEN B.ADDR1 LIKE '%인천%' THEN '인천'
+                    WHEN B.ADDR1 LIKE '%강원%' THEN '강원'
+                    WHEN B.ADDR1 LIKE '%제주%' THEN '제주'
+                    WHEN B.ADDR1 LIKE '%부산%' THEN '부산'
+                    WHEN B.ADDR1 LIKE '%대구%' THEN '대구'
+                    WHEN B.ADDR1 LIKE '%울산%' THEN '울산'
+                    WHEN B.ADDR1 LIKE '%광주%' THEN '광주'
+                    WHEN B.ADDR1 LIKE '%대전%' THEN '대전'
+                    WHEN B.ADDR1 LIKE '%세종%' THEN '세종'
+                    WHEN B.ADDR1 LIKE '%경상%' OR B.ADDR1 LIKE '%경북%' OR B.ADDR1 LIKE '%경남%' THEN '경상'
+                    WHEN B.ADDR1 LIKE '%전라%' OR B.ADDR1 LIKE '%전북%' OR B.ADDR1 LIKE '%전남%' THEN '전라'
+                    WHEN B.ADDR1 LIKE '%충청%' OR B.ADDR1 LIKE '%충북%' OR B.ADDR1 LIKE '%충남%' THEN '충청'
+                    ELSE '기타'
+                END,
+                SYSDATE
+        FROM    BUSINESS B
+        WHERE   B.ID = #{bizId}
+        AND     NOT EXISTS (    SELECT  1
+                                FROM    STAY S
+                                WHERE   S.BIZ_ID = B.ID
+                            )
+    </insert>
+
+    <update id="updateStay" parameterType="com.petcare.petcare.stay.vo.StayVO">
+        UPDATE STAY
+            <set>
+               <if test="name != null"> NAME = #{name}, </if>
+               <if test="phone != null"> PHONE = #{phone, jdbcType=VARCHAR}, </if>
+               <if test="zipcode != null"> ZIPCODE = #{zipcode, jdbcType=VARCHAR}, </if>
+               <if test="addr1 != null"> ADDR1 = #{addr1, jdbcType=VARCHAR}, </if>
+               <if test="addr2 != null"> ADDR2 = #{addr2, jdbcType=VARCHAR}, </if>
+               <if test="lat != null"> LAT = #{lat, jdbcType=DOUBLE}, </if>
+               <if test="lng != null"> LNG = #{lng, jdbcType=DOUBLE}, </if>
+               <if test="tags != null"> TAGS = #{tags, jdbcType=VARCHAR}, </if>
+               <if test="description != null"> DESCRIPTION = #{description, jdbcType=VARCHAR}, </if>
+               <if test="checkIn != null"> CHECKIN = #{checkIn, jdbcType=DATE}, </if>
+               <if test="checkOut != null"> CHECKOUT = #{checkOut, jdbcType=DATE}, </if>
+               <if test="petFee != null"> PET_FEE = #{petFee, jdbcType=NUMERIC}, </if>
+               <if test="petPolicy != null"> PET_POLICY = #{petPolicy, jdbcType=VARCHAR}, </if>
+               <if test="refundPolicy != null"> REFUND_POLICY = #{refundPolicy, jdbcType=VARCHAR}, </if>
+               <if test="region != null"> REGION = #{region, jdbcType=VARCHAR} </if>
+            </set>
+        WHERE  ID = #{stayId}
+    </update>
+
+    <!--객실-->
+    <select id="selectRoomListByStayId" parameterType="long" resultType="com.petcare.petcare.stay.vo.RoomVO">
+        SELECT      ID AS ROOM_ID,
+                    STAY_ID,
+                    NAME,
+                    PRICE,
+                    MAXPEOPLE,
+                    MAXPET,
+                    CREATED
+        FROM        ROOM
+        WHERE       STAY_ID = #{stayId}
+        ORDER BY    STAY_ID
+    </select>
+
+    <select id="selectRoom" parameterType="long" resultType="com.petcare.petcare.stay.vo.RoomVO">
+        SELECT      ID AS ROOM_ID,
+                    STAY_ID,
+                    NAME,
+                    PRICE,
+                    MAXPEOPLE,
+                    MAXPET,
+                    CREATED
+        FROM        ROOM
+        WHERE       STAY_ID = #{stayId}
+        ORDER BY    STAY_ID
+    </select>
+
+    <select id="selectRoomForUpdate" parameterType="long" resultType="com.petcare.petcare.stay.vo.RoomVO">
+        SELECT ID AS ROOM_ID,
+               STAY_ID,
+               NAME,
+               PRICE,
+               MAXPEOPLE,
+               MAXPET
+          FROM ROOM
+         WHERE ID = #{roomId}
+           FOR UPDATE
+    </select>
+
+    <insert id="insertRoom" parameterType="com.petcare.petcare.stay.vo.RoomVO">
+        INSERT INTO ROOM (
+                            STAY_ID, 
+                            NAME,
+                            PRICE, 
+                            MAXPEOPLE, 
+                            MAXPET, 
+                            CREATED
+                        ) 
+        VALUES (
+                            #{stayId}, 
+                            #{name},
+                            #{price}, 
+                            #{maxPeople, jdbcType=NUMERIC},
+                            #{maxPet, jdbcType=NUMERIC}, 
+                            SYSDATE
+                )
+    </insert>
+
+    <update id="updateRoom" parameterType="com.petcare.petcare.stay.vo.RoomVO">
+        UPDATE  ROOM
+            <set>
+                <if test="name != null"> NAME = #{name}, </if>
+                <if test="price != null"> PRICE = #{price, jdbcType=NUMERIC}, </if>
+                <if test="maxPeople != null"> MAXPEOPLE = #{maxPeople, jdbcType=NUMERIC}, </if>
+                <if test="maxPet != null"> MAXPET = #{maxPet, jdbcType=NUMERIC}, </if>
+            </set>
+        WHERE   ID = #{roomId}
+        AND     STAY_ID = #{stayId}
+    </update>
+
+    <!-- @Param을 사용하는 경우에는 parameterType을 설정하지 않아도 됨 -->
+    <delete id="deleteRoom" >
+        DELETE FROM ROOM WHERE  ID = #{roomId} AND  STAY_ID = #{stayId}
+    </delete>  
+</mapper>

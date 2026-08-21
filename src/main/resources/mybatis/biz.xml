@@ -1,0 +1,100 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.petcare.petcare.biz.mapper.BizMapper">
+
+  <select id="selectBusinessList" resultType="com.petcare.petcare.biz.vo.BusinessVO">
+    SELECT    ID  AS BIZID,
+              MEMBER_ID,
+              TYPE,
+              BIZNO,
+              NAME,
+              CEO,
+              PHONE,
+              ZIPCODE,
+              ADDR1,
+              ADDR2,
+              STATUS,
+              APPROVED,
+              CREATED
+    FROM      BUSINESS
+    WHERE     STATUS = #{status}
+    ORDER BY  CREATED DESC
+  </select>
+  
+  <select id="selectBusinessByMemberId" parameterType="string" resultType="com.petcare.petcare.biz.vo.BusinessVO">
+    SELECT      ID  AS BIZID,
+                MEMBER_ID,
+                TYPE,
+                BIZNO,
+                NAME,
+                CEO,
+                PHONE,
+                ZIPCODE,
+                ADDR1,
+                ADDR2,
+                STATUS,
+                APPROVED,
+                CREATED
+    FROM        BUSINESS
+    WHERE       MEMBER_ID = #{memberId}
+    FETCH       FIRST 1 ROW ONLY
+  </select>
+
+  <select id="selectBusinessByBizId" resultType="com.petcare.petcare.biz.vo.BusinessVO">
+    SELECT      ID AS BIZID,
+                MEMBER_ID,
+                TYPE,
+                BIZNO,
+                NAME,
+                CEO,
+                PHONE,
+                ZIPCODE,
+                ADDR1,
+                ADDR2,
+                STATUS,
+                APPROVED,
+                CREATED
+    FROM        BUSINESS
+    WHERE       ID = #{bizId}
+    FETCH       FIRST 1 ROW ONLY
+  </select>
+
+  <!--useGeneratedKeys : INSERT 직후 vo에 PK가 자동으로 들어가 있음-->
+  <insert id="insertBusiness" parameterType="com.petcare.petcare.biz.vo.BusinessVO" useGeneratedKeys="true" keyProperty="bizId" keyColumn="ID">
+    INSERT INTO BUSINESS (
+                                MEMBER_ID, 
+                                TYPE, 
+                                BIZNO, 
+                                NAME, 
+                                CEO, 
+                                PHONE,
+                                ZIPCODE,
+                                ADDR1,
+                                ADDR2, 
+                                STATUS,
+                                CREATED
+                            ) 
+    VALUES                  (
+                                #{memberId}, 
+                                #{type}, 
+                                #{bizNo}, 
+                                #{name}, 
+                                #{ceo}, 
+                                #{phone, jdbcType=VARCHAR}, 
+                                #{zipcode, jdbcType=VARCHAR}, 
+                                #{addr1, jdbcType=VARCHAR}, 
+                                #{addr2, jdbcType=VARCHAR}, 
+                                #{status}, 
+                                SYSDATE
+                            )
+  </insert>
+
+  <update id="updateBusinessStatus">
+    UPDATE BUSINESS SET STATUS = #{status}, APPROVED = SYSDATE WHERE ID = #{bizId}
+  </update>
+
+  <select id="countBusinessByStatus" resultType="int">
+    SELECT COUNT(*) FROM BUSINESS WHERE STATUS = #{status}
+  </select>
+</mapper>
